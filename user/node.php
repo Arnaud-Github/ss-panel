@@ -110,6 +110,11 @@ $node = new Ss\Node\Node();
         </section><!-- /.content -->
     </div><!-- /.content-wrapper -->
 
+<?php
+include_once '../Public_javascript.php';
+?>
+<!-- 在下面添加功能引用的js -->
+
 <script src="../asset/js/modal.js" type="text/javascript"></script>
 <?php
 require_once '_footer.php'; ?>
