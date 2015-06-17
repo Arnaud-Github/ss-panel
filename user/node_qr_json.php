@@ -12,7 +12,7 @@ $pass = $oo->get_pass();
 $port = $oo->get_port();
 
 $ssurl = "ss://".$method.":".$pass."@".$server.":".$port;
-$ssqr = "ss://".base64_encode($ssurl);
+$ssqr = "ss://".base64_encode($method.":".$pass."@".$server.":".$port);
 ?>
 <html>
 <head></head>
