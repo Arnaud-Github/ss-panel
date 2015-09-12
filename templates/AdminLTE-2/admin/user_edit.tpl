@@ -27,7 +27,6 @@
 
                             <div class="form-group">
                                 <label for="cate_title">ID: <{$uid}></label>
-                                <input type="hidden" class="form-control" id="user_uid" value="<{$uid}>"  >
                             </div>
 
                             <div class="form-group">
@@ -42,7 +41,6 @@
 
                             <div class="form-group">
                                 <label for="cate_title">用户密码</label>
-                                <input type="hidden" id="user_pass_hidden" value="<{$rs['pass']}>" >
                                 <input  class="form-control" id="user_pass" placeholder="新密码(不修改请留空)" >
                             </div>
 
@@ -53,13 +51,17 @@
 
                             <div class="form-group">
                                 <label for="cate_title">设置流量</label>
-                                <input type="hidden" id="transfer_enable_hidden" value="<{$rs['transfer_enable']}>" >
-                                <input   class="form-control" id="transfer_enable"  placeholder="单位为GB，直接输入数值" >
+                                <input   class="form-control" id="transfer_enable" value="<{\Ss\Etc\Comm::flowAutoShow($rs['transfer_enable'])}>" placeholder="单位为GB，直接输入数值" >
                             </div>
                             
                             <div class="form-group">
                                 <label for="cate_title">邀请码数量</label>
                                 <input  class="form-control" id="invite_num" value="<{$rs['invite_num']}>" 
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="enable">是否启用（1为启用，0为停用）</label>
+                                <input type="text" name="enable" id="enable" value="<{$rs['enable']}>" class="form-control"> 
                             </div>
 
                         </div><!-- /.box-body -->
@@ -85,7 +87,16 @@
 
 <{include file='Public_javascript.tpl'}>
 <!-- 在下面添加功能引用的js -->
-
+<script>    
+// 过滤HTML标签以及&nbsp 来自：http://www.cnblogs.com/liszt/archive/2011/08/16/2140007.html
+function removeHTMLTag(str) {
+        str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
+        str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白
+        str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
+        str = str.replace(/&nbsp;/ig,'');//去掉&nbsp;
+        return str;
+}
+</script>
 <script>
     $(document).ready(function(){
         $("#Submit").click(function(){
@@ -94,16 +105,17 @@
                 url:"_user_edit.php",
                 dataType:"json",
                 data:{
-                    user_uid: $("#user_uid").val(),
+                    user_uid: "<{$uid}>",
                     user_name: $("#user_name").val(),
                     user_email: $("#user_email").val(),
-                    user_email_hidden: $("#user_email_hidden").val(),
+                    user_email_hidden: "<{$rs['email']}>",
                     user_pass: $("#user_pass").val(),
-                    user_pass_hidden: $("#user_pass_hidden").val(),
+                    user_pass_hidden: "<{$rs['pass']}>",
                     user_passwd: $("#user_passwd").val(),
                     transfer_enable: $("#transfer_enable").val(),
-                    transfer_enable_hidden: $("#transfer_enable_hidden").val(),
-                    invite_num: $("#invite_num").val()
+                    transfer_enable_hidden: "<{\Ss\Etc\Comm::flowAutoShow($rs['transfer_enable'])}>",
+                    invite_num: $("#invite_num").val(),
+                    enable: $("#enable").val()
                 },
                 success:function(data){
                     if(data.ok){
@@ -117,9 +129,11 @@
                     }
                 },
                 error:function(jqXHR){
-                    $("#msg-error").hide(10);
-                    $("#msg-error").show(100);
-                    $("#msg-error-p").html("发生错误："+jqXHR.status);
+                        $("#msg-error-p").html("发生错误："+jqXHR.status);
+                        $("#msg-error").hide(10);
+                        $("#msg-error").show(100);
+                        // 在控制台输出错误信息
+                        console.log(removeHTMLTag(jqXHR.responseText));
                 }
             })
         })

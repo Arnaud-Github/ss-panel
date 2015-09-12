@@ -30,8 +30,10 @@
                                     <th>已用流量</th>
                                     <th>上传流量</th>
                                     <th>下载流量</th>
-                                    <th>最后签到</th>
                                     <th>注册时间</th>
+                                    <th>最后签到</th>
+                                    <th>最近使用</th>
+                                    <th>启用状态</th>
                                     <th>邀请人</th>
                                     <th>邀请码</th>
                                     <th>操作</th>
@@ -49,8 +51,10 @@
                                         <td><{\Ss\Etc\Comm::flowAutoShow(($rs['u']+$rs['d']))}></td>
                                         <td><{\Ss\Etc\Comm::flowAutoShow($rs['u'])}></td>
                                         <td><{\Ss\Etc\Comm::flowAutoShow($rs['d'])}></td>
-                                        <td><{date('Y-m-d H:i:s',$rs['last_check_in_time'])}></td>
                                         <td><{$rs['reg_date']}></td>
+                                        <td><{date('Y-m-d H:i:s',$rs['last_check_in_time'])}></td>
+                                        <td><{date('Y-m-d H:i:s',$rs['t'])}></td>
+                                        <td><{if $rs['enable']}><span class="label label-success">正常</span><{else}><code>停止</code><{/if}></td>
                                         <td><{get_ref_name rs=$rs['ref_by']}></td><{* 调用自定义插件 传$rs['ref_by'] 然后返回数据 *}>
                                         <td><{$rs['invite_num']}></td>
                                         <td>
@@ -65,7 +69,6 @@
                     </div><!-- /.box -->
                 </div>
             </div>
-
         </section><!-- /.content -->
     </div><!-- /.content-wrapper -->
 <{include file='Public_javascript.tpl'}>
@@ -87,7 +90,7 @@
         "bStateSave": true,
         "sScrollX": "100%",
         "sScrollY": "100%",
-        "sScrollXInner": "110%",
+        "sScrollXInner": "100%",
         "bScrollCollapse": true,
         //流量排序
         columnDefs: [

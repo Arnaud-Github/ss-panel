@@ -1,7 +1,4 @@
 <{include file='admin/main.tpl'}>
-
-<!-- =============================================== -->
-
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -23,24 +20,22 @@
                     <div class="box-header">
                         <h3 class="box-title">修改<{$announcement_title}></h3>
                     </div><!-- /.box-header -->
+                    <{if $announcement_name!=null}>
                         <div class="box-body">
-
-                        <form role="form" method="post" action="javascript:submit();">
-                            <div class="form-group">
-                                <input type="text" class="form-control"  id="announcement_name" value="<{$announcement_name}>" style="display:none" >
-                            </div>
-
-                            <div class="form-group">
-                               <!--  <textarea id="new_content" type="text" name="new_content" class="textarea" placeholder="请输入内容" style="width: 100%; height: 125px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"><{$original_content}></textarea> -->
-                               <{textareaCodemirror name="new_content" id="new_content" class="textarea"}><{$original_content}><{/textareaCodemirror}>
-                            </div>
-
+                            <form role="form" method="post" action="javascript:submit();">
+                                <div class="form-group">
+                                   <{textareaCodemirror name="new_content" id="new_content" class="textarea"}><{$original_content}><{/textareaCodemirror}>
+                                </div>
+                                <div class="box-footer">
+                                    <button type="Submit" id="Submit" name="action" value="edit" class="btn btn-primary">修改</button>
+                                </div>
+                            </form>
                         </div><!-- /.box-body -->
-
-                        <div class="box-footer">
-                            <button type="Submit" id="Submit" name="action" value="edit" class="btn btn-primary">修改</button>
-                        </div>
-                        </form>
+                    <{else}>
+                        <div class="box-body">
+                            没有这个公告名称
+                        </div><!-- /.box-body -->
+                    <{/if}>
                         <div id="msg-success" class="alert alert-info alert-dismissable" style="display: none;">
                             <button type="button" class="close" id="ok-close" aria-hidden="true">&times;</button>
                             <h4><i class="icon fa fa-info"></i> 成功!</h4>
@@ -61,13 +56,23 @@
 <!-- 在下面添加功能引用的js -->
 
 <script>
+// 过滤HTML标签以及&nbsp 来自：http://www.cnblogs.com/liszt/archive/2011/08/16/2140007.html
+function removeHTMLTag(str) {
+        str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
+        str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白
+        str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
+        str = str.replace(/&nbsp;/ig,'');//去掉&nbsp;
+        return str;
+}
+</script>
+<script>
 function submit(){
     $.ajax({
             type:"POST",
             url:"_change_announcement.php",
             dataType:"json",
             data:{
-                announcement_name: $("#announcement_name").val(),
+                announcement_name: "<{$announcement_name}>",
                 new_content: $("#new_content").val()
             },
         success:function(data){
@@ -82,9 +87,11 @@ function submit(){
             }
         },
         error:function(jqXHR){
-            $("#msg-error").hide(10);
-            $("#msg-error").show(100);
-            $("#msg-error-p").html("发生错误："+jqXHR.status);
+                $("#msg-error-p").html("发生错误："+jqXHR.status);
+                $("#msg-error").hide(10);
+                $("#msg-error").show(100);
+                // 在控制台输出错误信息
+                console.log(removeHTMLTag(jqXHR.responseText));
         }
     })
 }
@@ -95,5 +102,4 @@ $("#error-close").click(function(){
     $("#msg-error").hide(100);
 })
 </script>
-
 <{include file='user/footer.tpl'}>

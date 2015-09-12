@@ -18,10 +18,6 @@
                       <div class="black-text">
                           <form role="form" method="post" action="javascript:void(0);">
                               ID: <{$uid}>
-                              <div class="input-field" style="display:none">
-                                <input type="text" name="user_uid" id="user_uid" value="<{$uid}>" class="validate" style="display:none">
-                                <label for="user_uid">ID: <{$uid}></label>
-                              </div>
                               <div class="input-field">
                                 <input type="text" name="user_name" id="user_name" value="<{$rs['user_name']}>" class="validate">
                                 <label for="user_name">用户名</label>
@@ -31,7 +27,6 @@
                                 <label for="user_email">用户邮箱</label>
                               </div>
                               <div class="input-field">
-                                <input class="form-control" id="user_pass_hidden" value="<{$rs['pass']}>" style="display:none">
                                 <input type="text" name="user_pass" id="user_pass" class="validate">
                                 <label for="user_pass">用户密码 新密码(不修改请留空)</label>
                               </div>
@@ -40,7 +35,6 @@
                                 <label for="user_passwd">连接密码</label>
                               </div>
                               <div class="input-field">
-                                <input type="hidden" id="transfer_enable_hidden" value="<{$rs['transfer_enable']}>" style="display:none">
                                 <input type="text" name="transfer_enable" id="transfer_enable" value="<{\Ss\Etc\Comm::flowAutoShow($rs['transfer_enable'])}>" class="validate">
                                 <label for="transfer_enable">设置流量 单位为GB</label>
                               </div>
@@ -48,6 +42,10 @@
                                 <input type="text" name="invite_num" id="invite_num" value="<{$rs['invite_num']}>" class="validate">
                                 <label for="invite_num">邀请码数量</label>
                               </div>
+                              <div class="input-field">
+                                <input type="text" name="enable" id="enable" value="<{$rs['enable']}>" class="validate">
+                                <label for="enable">是否启用（1为启用，0为停用）</label>
+                              </div>   
                                   <button id="Submit" type="submit" class="btn waves-effect waves-light light-blue lighten-1">修改</button>
                           </form>
                       </div>
@@ -66,6 +64,14 @@
 <script type="text/javascript" src="<{$resources_dir}>/asset/js/Prompt_message.js?<{$version}><{date('Ym')}>"></script>
 <script type="text/javascript">
   _Prompt_msg();
+  // 过滤HTML标签以及&nbsp 来自：http://www.cnblogs.com/liszt/archive/2011/08/16/2140007.html
+  function removeHTMLTag(str) {
+      str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
+      str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白
+      str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
+      str = str.replace(/&nbsp;/ig,'');//去掉&nbsp;
+      return str;
+  }
 </script>
 <script type="text/javascript">
     $(document).ready(function(){
@@ -75,16 +81,17 @@
                 url:"_user_edit.php",
                 dataType:"json",
                 data:{
-                    user_uid: $("#user_uid").val(),
+                    user_uid: "<{$uid}>",
                     user_name: $("#user_name").val(),
                     user_email: $("#user_email").val(),
-                    user_email_hidden: $("#user_email_hidden").val(),
+                    user_email_hidden: "<{$rs['email']}>",
                     user_pass: $("#user_pass").val(),
-                    user_pass_hidden: $("#user_pass_hidden").val(),
+                    user_pass_hidden: "<{$rs['pass']}>",
                     user_passwd: $("#user_passwd").val(),
                     transfer_enable: $("#transfer_enable").val(),
-                    transfer_enable_hidden: $("#transfer_enable_hidden").val(),
-                    invite_num: $("#invite_num").val()
+                    transfer_enable_hidden: "<{\Ss\Etc\Comm::flowAutoShow($rs['transfer_enable'])}>",
+                    invite_num: $("#invite_num").val(),
+                    enable: $("#enable").val()
                 },
                 success:function(data){
                     if(data.ok){
@@ -98,8 +105,10 @@
                     }
                 },
                 error:function(jqXHR){
-                    $("#msg-error").openModal();
-                    $("#msg-error-p").html("发生错误："+jqXHR.status);
+                        $("#msg-error-p").html("发生错误："+jqXHR.status);
+                        $("#msg-error").openModal();
+                        // 在控制台输出错误信息
+                        console.log(removeHTMLTag(jqXHR.responseText));
                 }
             })
         })

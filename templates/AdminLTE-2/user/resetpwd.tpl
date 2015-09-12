@@ -72,6 +72,14 @@
     });
     // $("#msg-error").hide();
     // $("#msg-success").hide();
+    // 过滤HTML标签以及&nbsp 来自：http://www.cnblogs.com/liszt/archive/2011/08/16/2140007.html
+    function removeHTMLTag(str) {
+            str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
+            str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白
+            str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
+            str = str.replace(/&nbsp;/ig,'');//去掉&nbsp;
+            return str;
+    }
 </script>
 
 <script>
@@ -94,9 +102,11 @@
                     }
                 },
                 error:function(jqXHR){
-                    $("#msg-error").hide(10);
-                    $("#msg-error").show(100);
-                    $("#msg-error-p").html("发生错误："+jqXHR.status);
+                        $("#msg-error-p").html("发生错误："+jqXHR.status);
+                        $("#msg-error").hide(10);
+                        $("#msg-error").show(100);
+                        // 在控制台输出错误信息
+                        console.log(removeHTMLTag(jqXHR.responseText));
                 }
             });
             
@@ -110,7 +120,7 @@
                         msg_id=1;
                         return false;
                     }
-                    var email_reg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+                    var email_reg = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/;
                     if(!email_reg.test($("#email").val())) {
                         id_name="#email";
                         msg_out("请输入有效的邮箱！","error");

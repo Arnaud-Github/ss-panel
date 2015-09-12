@@ -46,11 +46,19 @@
 
                     <form  action="javascript:void(0);" autocomplete="off" method="POST">
                       <div class="input-field">
-                        <input type="hidden" id="code" name="code" class="form-control" value="<{$code|default:""}>" >
-                        <input type="hidden" id="uid" name="uid" class="form-control" value="<{$uid|default:""}>" >
                         <i class="mdi-content-mail prefix"></i>
                         <input id="email" type="email" name="email" class="validate" maxlength="30" required>
                         <label for="email">邮箱 Email</label>
+                      </div>
+                      <div class="input-field">
+                        <i class="mdi-action-lock prefix"></i>
+                        <input id="password" type="password" name="password" class="validate" maxlength="18" required>
+                        <label for="password">密码 PassWord</label>
+                      </div>
+                      <div class="input-field">
+                        <i class="mdi-action-lock prefix"></i>
+                        <input id="repassword" type="password" name="repassword" class="validate" maxlength="18" required>
+                        <label for="repassword">重复密码 RePassWord</label>
                       </div>
                         <div class="center-btn">
                             <p>
@@ -68,32 +76,46 @@
         <script type="text/javascript" src="<{$resources_dir}>/asset/js/Prompt_message.js?<{$version}><{date('Ym')}>"></script>
         <script type="text/javascript">
             _Prompt_msg();
+            // 过滤HTML标签以及&nbsp 来自：http://www.cnblogs.com/liszt/archive/2011/08/16/2140007.html
+            function removeHTMLTag(str) {
+                    str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
+                    str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白
+                    str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
+                    str = str.replace(/&nbsp;/ig,'');//去掉&nbsp;
+                    return str;
+            }
         </script>
         <script type="text/javascript">
             $(document).ready(function(){
                   function reset(){
                        $.ajax({
-                        type:"GET",
-                        url:"_resetpwdtwo.php?code="+$("#code").val()+"&uid="+$("#uid").val()+"&email="+$("#email").val(),
+                        type:"POST",
+                        url:"_resetpwdtwo.php",
                         dataType:"json",
+                        data:{
+                            uid: "<{$uid|default:""}>",
+                            code: "<{$code|default:""}>",
+                            email: $("#email").val(),
+                            password: $("#password").val(),
+                            repasswd: $("#repassword").val(),
+                        },
                         success:function(data){
                             if(data.ok){
-                                Materialize.toast(data.msg, 3000, 'rounded')
                                 $("#msg-error").closeModal();
                                 $("#msg-success").openModal();
                                 $("#msg-success-p").html(data.msg);
                                 window.setTimeout("location.href='index.php'", 2000);
                             }else{
-                                Materialize.toast(data.msg, 3000, 'rounded')
                                 $("#msg-success").closeModal();
                                 $("#msg-error").openModal();
                                 $("#msg-error-p").html(data.msg);
                             }
                         },
                         error:function(jqXHR){
-                            Materialize.toast("发生错误："+jqXHR.status, 3000, 'rounded')
-                            $("#msg-error").openModal();
-                            $("#msg-error-p").html("发生错误："+jqXHR.status);
+                                $("#msg-error-p").html("发生错误："+jqXHR.status);
+                                $("#msg-error").openModal();
+                                // 在控制台输出错误信息
+                                console.log(removeHTMLTag(jqXHR.responseText));
                         }
                     });
                     
@@ -128,6 +150,30 @@
                                     return false;
                                     }
                             }
+                            if($("#password").val().length==0){
+                            id_name="#password";
+                            msg_out("请输入密码","error");
+                            msg_id=1;
+                            return false;
+                            }
+                            if(($("#password").val()).length<8){
+                                id_name="#password";
+                                msg_out("密码太短，长度为8位以上。","error");
+                                msg_id=1;
+                                return false;
+                            }
+                            if($("#repassword").val().length==0){
+                                id_name="#repassword";
+                                msg_out("请输入重复密码","error");
+                                msg_id=1;
+                                return false;
+                            }
+                            if($("#password").val() != $("#repassword").val()){
+                                id_name="#repassword";
+                                msg_out("两次密码不一样，请重新输入！","error");
+                                msg_id=1;
+                                return false;
+                            }
                             if(msg_id==0){ 
                                     reset();
                             }
@@ -138,6 +184,7 @@
                             $(id_name).focus();
                             // $("#msg-"+msgcss).openModal();
                             $("#msg-"+msgcss+"-p").html(msgout);
+                            error_close();
                 }
                 $("html").keydown(function(event){
                     if(event.keyCode==13){
@@ -158,7 +205,7 @@
                     error_close();
                 });
                 function error_close(){
-                    if($("#msg-error").css('display')=="block"){
+                    if($("#msg-error").css('display')=="none"){
                         $("#msg-error").closeModal();
                         $(id_name).focus();
                         if(id_name=="#email"){
