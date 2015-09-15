@@ -7,8 +7,9 @@ $passwd = \Ss\User\Comm::SsPW($passwd);
 $rem = $_POST['remember_me'];
 $c = new \Ss\User\UserCheck();
 $q = new \Ss\User\Query();
-//加入防签到系统平台，如果不是在登录页点的登录，返回非法访问。
-if($_SERVER['HTTP_REFERER']!=$site_url."user/login.php"){
+session_start();
+//加入防签到系统平台，如果不是在用户中心点的签到都不会奖励流量。
+if($_SESSION['assp']==false){
     $rs['code'] = '0';
     $rs['msg'] = "非法访问";
 }
@@ -29,6 +30,7 @@ elseif($c->EmailLogin($email,$passwd)){
     setcookie("user_pwd",$pw,time()+$ext);
     setcookie("uid",$id,time()+$ext);
     setcookie("user_email",$email,time()+$ext);
+    unset($_SESSION['assp']); //删除session的assp值
 }else{
     $rs['code'] = '0';
     $rs['msg'] = "邮箱或者密码错误";
